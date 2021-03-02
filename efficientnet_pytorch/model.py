@@ -284,14 +284,15 @@ class EfficientNet(nn.Module):
         """
         # Stem
         x = self._swish(self._bn0(self._conv_stem(inputs)))
-
+        # print(x.shape)  #torch.Size([1, 64, 112, 112])
         # Blocks
         for idx, block in enumerate(self._blocks):
             drop_connect_rate = self._global_params.drop_connect_rate
             if drop_connect_rate:
                 drop_connect_rate *= float(idx) / len(self._blocks) # scale drop connect_rate
             x = block(x, drop_connect_rate=drop_connect_rate)
-
+            print(x.shape)
+        # print(x.shape) #torch.Size([1, 640, 7, 7])
         # Head
         x = self._swish(self._bn1(self._conv_head(x)))
 
@@ -309,13 +310,14 @@ class EfficientNet(nn.Module):
         """
         # Convolution layers
         x = self.extract_features(inputs)
+        # print(x.shape)  #torch.Size([1, 2560, 7, 7])
         # Pooling and final linear layer
         x = self._avg_pooling(x)
         if self._global_params.include_top:
             x = x.flatten(start_dim=1)
             x = self._dropout(x)
             x = self._fc(x)
-        return x
+        return x    #torch.Size([1, 1000])
 
     @classmethod
     def from_name(cls, model_name, in_channels=3, **override_params):
